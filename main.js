@@ -4,7 +4,7 @@
   const MAX_COUNT = 8;
   const MAX_ALIVE = 10;
   const SPAWN_INTERVAL = 2000;
-  const MOVE_INTERVAL = 80;
+  const MOVE_INTERVAL = 55;
   const MIN_PERCENT = 12;
   const MAX_PERCENT = 88;
   const BG_REMOVE_TOLERANCE = 48;
@@ -113,10 +113,10 @@
       spriteOffset = -Math.PI / 2; // 아래쪽 머리를 오른쪽 기준으로 맞추기
     }
 
-    // 개미마다 크기 랜덤 (차이 크게: 0.5~1.5배, 모바일은 최소 40px)
-    const baseSize = 42;
-    const scale = randomBetween(0.5, 1.5);
-    const minSize = typeof ontouchstart !== 'undefined' ? 40 : 24;
+    // 개미마다 크기 랜덤 (차이 더 크게: 0.4~1.65배)
+    const baseSize = 40;
+    const scale = randomBetween(0.4, 1.65);
+    const minSize = typeof ontouchstart !== 'undefined' ? 36 : 22;
     const size = Math.max(minSize, Math.round(baseSize * scale));
     ant.style.width = size + 'px';
     ant.style.height = size + 'px';
@@ -145,27 +145,25 @@
           if (ant.classList.contains('squished')) return;
           idx = 1 - idx;
           img.src = frames[idx];
-        }, 160);
+        }, 95);
       });
     });
 
     ant.appendChild(img);
 
     let x, y, angle, speed;
-    let wobblePhase = randomBetween(0, Math.PI * 2);
-    let driftAngle = randomBetween(0, Math.PI * 2);
     if (opts.fromEdge) {
       const theta = randomBetween(0, Math.PI * 2);
       const r = 55;
       x = 50 + r * Math.cos(theta);
       y = 50 + r * Math.sin(theta);
       angle = theta + Math.PI;
-      speed = randomBetween(0.2, 0.36);
+      speed = randomBetween(0.28, 0.44);
     } else {
       x = randomBetween(MIN_PERCENT, MAX_PERCENT);
       y = randomBetween(MIN_PERCENT, MAX_PERCENT);
       angle = randomBetween(0, Math.PI * 2);
-      speed = randomBetween(0.16, 0.34);
+      speed = randomBetween(0.24, 0.42);
     }
 
     function setPosition() {
@@ -178,17 +176,11 @@
     const move = () => {
       if (ant.classList.contains('squished')) return;
 
-      wobblePhase += 0.12;
-      driftAngle += randomBetween(-0.02, 0.02);
-      if (Math.random() < 0.06) {
-        driftAngle += randomBetween(-0.25, 0.25);
+      if (Math.random() < 0.15) {
+        angle += randomBetween(-0.3, 0.3);
       }
-      angle += (driftAngle - angle) * 0.08;
-      var wobble = Math.sin(wobblePhase) * 0.04;
-      var moveAngle = angle + wobble;
-      var speedNow = speed * (0.92 + 0.16 * Math.sin(wobblePhase * 0.7));
-      var vx = Math.cos(moveAngle) * speedNow;
-      var vy = Math.sin(moveAngle) * speedNow;
+      var vx = Math.cos(angle) * speed;
+      var vy = Math.sin(angle) * speed;
 
       x += vx;
       y += vy;
