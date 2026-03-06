@@ -67,8 +67,12 @@ html, body {
   cursor: pointer;
   width:  clamp(28px, 8vmin, 48px);
   height: clamp(28px, 8vmin, 48px);
+  min-width: 44px;
+  min-height: 44px;
   transition: transform 0.15s ease-out;
   will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .ants .ant-img {
@@ -181,11 +185,13 @@ html, body {
 /* 전체화면 버튼 */
 .fullscreen-btn {
   position: fixed;
-  right: 0.75rem;
-  bottom: 0.75rem;
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
   z-index: 15;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
   border: none;
   border-radius: 50%;

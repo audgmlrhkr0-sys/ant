@@ -36,50 +36,67 @@
     }
     const img = new Image();
     img.crossOrigin = '';
+    const done = function (url) {
+      try {
+        if (url !== src) cutoutCache[src] = url;
+      } catch (e) {}
+      callback(url);
+    };
+    const timeout = setTimeout(function () { done(src); }, 3000);
     img.onload = function () {
-      const w = img.naturalWidth;
-      const h = img.naturalHeight;
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const data = ctx.getImageData(0, 0, w, h);
-      const d = data.data;
-      const samples = [
-        [0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1],
-        [1, 0], [0, 1], [w - 2, 0], [0, h - 2], [w - 1, 1], [1, h - 1]
-      ];
-      const bgColors = [];
-      const seen = new Set();
-      for (const [px, py] of samples) {
-        const i = (py * w + px) * 4;
-        const r = d[i], g = d[i + 1], b = d[i + 2];
-        const key = colorKey(r, g, b);
-        if (!seen.has(key)) {
-          seen.add(key);
-          bgColors.push([r, g, b]);
-        }
-      }
-      for (let i = 0; i < d.length; i += 4) {
-        const r = d[i], g = d[i + 1], b = d[i + 2];
-        let match = false;
-        for (const [br, bg, bb] of bgColors) {
-          if (Math.abs(r - br) <= BG_REMOVE_TOLERANCE &&
-              Math.abs(g - bg) <= BG_REMOVE_TOLERANCE &&
-              Math.abs(b - bb) <= BG_REMOVE_TOLERANCE) {
-            match = true;
-            break;
+      try {
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const data = ctx.getImageData(0, 0, w, h);
+        const d = data.data;
+        const samples = [
+          [0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1],
+          [1, 0], [0, 1], [w - 2, 0], [0, h - 2], [w - 1, 1], [1, h - 1]
+        ];
+        const bgColors = [];
+        const seen = new Set();
+        for (const k = 0; k < samples.length; k++) {
+          const px = samples[k][0], py = samples[k][1];
+          const i = (py * w + px) * 4;
+          const r = d[i], g = d[i + 1], b = d[i + 2];
+          const key = colorKey(r, g, b);
+          if (!seen.has(key)) {
+            seen.add(key);
+            bgColors.push([r, g, b]);
           }
         }
-        if (match) d[i + 3] = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i], g = d[i + 1], b = d[i + 2];
+          let match = false;
+          for (let j = 0; j < bgColors.length; j++) {
+            const br = bgColors[j][0], bg = bgColors[j][1], bb = bgColors[j][2];
+            if (Math.abs(r - br) <= BG_REMOVE_TOLERANCE &&
+                Math.abs(g - bg) <= BG_REMOVE_TOLERANCE &&
+                Math.abs(b - bb) <= BG_REMOVE_TOLERANCE) {
+              match = true;
+              break;
+            }
+          }
+          if (match) d[i + 3] = 0;
+        }
+        ctx.putImageData(data, 0, 0);
+        const out = canvas.toDataURL('image/png');
+        clearTimeout(timeout);
+        done(out);
+      } catch (e) {
+        clearTimeout(timeout);
+        done(src);
       }
-      ctx.putImageData(data, 0, 0);
-      const out = canvas.toDataURL('image/png');
-      cutoutCache[src] = out;
-      callback(out);
     };
-    img.onerror = () => callback(src);
+    img.onerror = function () {
+      clearTimeout(timeout);
+      done(src);
+    };
     img.src = src;
   }
 
@@ -96,10 +113,11 @@
       spriteOffset = -Math.PI / 2; // 아래쪽 머리를 오른쪽 기준으로 맞추기
     }
 
-    // 개미마다 크기 랜덤 (조금 작은 개미 / 큰 개미 섞기)
-    const baseSize = 40; // px 기준 기본 크기
+    // 개미마다 크기 랜덤 (모바일은 터치 영역 44px 이상)
+    const baseSize = 40;
     const scale = randomBetween(0.7, 1.3);
-    const size = baseSize * scale;
+    const minSize = typeof ontouchstart !== 'undefined' ? 44 : 28;
+    const size = Math.max(minSize, Math.round(baseSize * scale));
     ant.style.width = size + 'px';
     ant.style.height = size + 'px';
 
@@ -115,11 +133,10 @@
       null;
     const animated = !!altFrame;
 
+    img.src = src;
     removeBackground(src, function (url0) {
-      if (!animated) {
-        img.src = url0;
-        return;
-      }
+      img.src = url0;
+      if (!animated) return;
       removeBackground(altFrame, function (url1) {
         const frames = [url0, url1];
         let idx = 0;
@@ -259,18 +276,41 @@
 
   var fullscreenBtn = document.getElementById('fullscreenBtn');
   var fullscreenIcon = document.getElementById('fullscreenIcon');
-  if (fullscreenBtn) {
+  if (fullscreenBtn && fullscreenIcon) {
+    var doc = document;
+    var docEl = doc.documentElement;
+    var fullscreenEl = function () {
+      return doc.fullscreenElement || doc.webkitFullscreenElement || null;
+    };
+    var requestFs = function () {
+      if (docEl.requestFullscreen) return docEl.requestFullscreen();
+      if (docEl.webkitRequestFullscreen) return docEl.webkitRequestFullscreen();
+      if (docEl.webkitEnterFullscreen) return docEl.webkitEnterFullscreen();
+      return Promise.reject(new Error('unsupported'));
+    };
+    var exitFs = function () {
+      if (doc.exitFullscreen) return doc.exitFullscreen();
+      if (doc.webkitExitFullscreen) return doc.webkitExitFullscreen();
+      return Promise.reject(new Error('unsupported'));
+    };
     function updateFullscreenIcon() {
-      fullscreenIcon.textContent = document.fullscreenElement ? '\u229F' : '\u26F6';
-      fullscreenBtn.classList.toggle('fullscreen', !!document.fullscreenElement);
+      var inFs = !!fullscreenEl();
+      fullscreenIcon.textContent = inFs ? '\u229F' : '\u26F6';
+      fullscreenBtn.classList.toggle('fullscreen', inFs);
     }
-    fullscreenBtn.addEventListener('click', function () {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().then(updateFullscreenIcon).catch(function () {});
+    function toggleFullscreen() {
+      if (!fullscreenEl()) {
+        requestFs().then(updateFullscreenIcon).catch(function () {});
       } else {
-        document.exitFullscreen().then(updateFullscreenIcon).catch(function () {});
+        exitFs().then(updateFullscreenIcon).catch(function () {});
       }
-    });
-    document.addEventListener('fullscreenchange', updateFullscreenIcon);
+    }
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    fullscreenBtn.addEventListener('touchend', function (e) {
+      e.preventDefault();
+      toggleFullscreen();
+    }, { passive: false });
+    doc.addEventListener('fullscreenchange', updateFullscreenIcon);
+    doc.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
   }
 })();
