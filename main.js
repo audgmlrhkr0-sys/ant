@@ -176,8 +176,8 @@
     const move = () => {
       if (ant.classList.contains('squished')) return;
 
-      if (Math.random() < 0.15) {
-        angle += randomBetween(-0.3, 0.3);
+      if (Math.random() < 0.06) {
+        angle += randomBetween(-0.2, 0.2);
       }
       var vx = Math.cos(angle) * speed;
       var vy = Math.sin(angle) * speed;
