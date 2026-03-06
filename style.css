@@ -1,0 +1,205 @@
+/* 도자기·옥 느낌 배경 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(160deg, #8fa68a 0%, #b8c9b0 30%, #d4e0d0 60%, #e8efe5 100%);
+  font-family: "Noto Serif KR", serif;
+}
+
+.frame {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem 0.5rem;
+}
+
+/* 도자기 접시 영역 */
+.plate-wrap {
+  position: relative;
+  width: min(96vmin, 420px);
+  height: min(96vmin, 420px);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.4),
+    inset 0 2px 8px rgba(0,0,0,0.06),
+    0 8px 24px rgba(0,0,0,0.12),
+    0 2px 6px rgba(0,0,0,0.08);
+  overflow: hidden;
+  background: linear-gradient(145deg, #c5d4c2 0%, #e2e8df 50%, #d0dccd 100%);
+}
+
+.plate {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 58%;
+  pointer-events: none;
+}
+
+.ants {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ants .ant {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  width:  clamp(28px, 8vmin, 48px);
+  height: clamp(28px, 8vmin, 48px);
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+
+.ants .ant-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: 50% 60%;
+  animation: ant-walk 0.3s infinite alternate ease-in-out;
+}
+
+.ants .ant.squished {
+  pointer-events: none;
+  animation: squish 0.35s ease-out forwards;
+}
+
+.ants .ant.squished .ant-img {
+  animation: none;
+}
+
+@keyframes ant-walk {
+  0% {
+    transform: translateY(0) scaleY(1);
+  }
+  100% {
+    transform: translateY(-1px) scaleY(0.96);
+  }
+}
+
+@keyframes squish {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(-50%, -50%) scale(1.3, 0.8) rotate(-6deg);
+    filter: saturate(1.2);
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1.8, 0.4) rotate(8deg);
+    filter: saturate(1.4) blur(0.5px);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.1, 0.2) rotate(0deg);
+    opacity: 0;
+    filter: saturate(1.2) blur(1px);
+  }
+}
+
+/* 시작 화면 */
+.start-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.start-overlay.active {
+  pointer-events: auto;
+}
+
+.start-blur {
+  position: absolute;
+  inset: -20px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.start-overlay.active .start-blur {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.start-overlay.hidden {
+  display: none;
+}
+
+.start-btn {
+  position: relative;
+  z-index: 2;
+  padding: 1rem 1.8rem;
+  font-size: 1.1rem;
+  font-family: inherit;
+  color: #1a2a1a;
+  letter-spacing: 0.04em;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #a8c4a0 0%, #c5dcc0 40%, #9bb396 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 -1px 0 rgba(0,0,0,0.08),
+    0 4px 12px rgba(0,0,0,0.15);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.start-btn:active {
+  transform: scale(0.98);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.frame.blurred .plate-wrap {
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+/* 전체화면 버튼 */
+.fullscreen-btn {
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 15;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #a8c4a0 0%, #c5dcc0 50%, #9bb396 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    0 2px 8px rgba(0,0,0,0.12);
+  color: #1a2a1a;
+  font-size: 1.25rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.fullscreen-btn:active {
+  transform: scale(0.95);
+}

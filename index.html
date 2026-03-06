@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>도자기 위의 개미</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="frame blurred" id="gameFrame">
+    <div class="plate-wrap" id="plateWrap">
+      <img src="b.png" alt="" class="plate" id="plate">
+      <div class="ants" id="ants"></div>
+    </div>
+  </div>
+  <div class="start-overlay active" id="startOverlay">
+    <div class="start-blur" id="startBlur"></div>
+    <button type="button" class="start-btn" id="startBtn">개미를 눌러보세요</button>
+  </div>
+  <button type="button" class="fullscreen-btn" id="fullscreenBtn" title="전체화면" aria-label="전체화면">
+    <span class="fullscreen-icon" id="fullscreenIcon">⛶</span>
+  </button>
+  <script src="main.js"></script>
+</body>
+</html>
