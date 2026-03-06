@@ -299,10 +299,20 @@
       fullscreenBtn.classList.toggle('fullscreen', inFs);
     }
     function toggleFullscreen() {
-      if (!fullscreenEl()) {
-        requestFs().then(updateFullscreenIcon).catch(function () {});
-      } else {
+      var inRealFs = !!fullscreenEl();
+      var inPseudo = doc.body.classList.contains('pseudo-fullscreen');
+      if (inRealFs) {
         exitFs().then(updateFullscreenIcon).catch(function () {});
+      } else if (inPseudo) {
+        doc.body.classList.remove('pseudo-fullscreen');
+        fullscreenBtn.classList.remove('fullscreen');
+        fullscreenIcon.textContent = '\u26F6';
+      } else {
+        requestFs().then(updateFullscreenIcon).catch(function () {
+          doc.body.classList.add('pseudo-fullscreen');
+          fullscreenBtn.classList.add('fullscreen');
+          fullscreenIcon.textContent = '\u229F';
+        });
       }
     }
     fullscreenBtn.addEventListener('click', toggleFullscreen);

@@ -4,6 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>도자기 위의 개미</title>
+  <script>
+    (function () {
+      var path = document.location.pathname;
+      var base = path.endsWith('/') ? path : path.replace(/\/[^/]*$/, '/');
+      if (base && base !== '/') {
+        var b = document.createElement('base');
+        b.href = document.location.origin + base;
+        document.head.insertBefore(b, document.head.firstChild);
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
