@@ -113,10 +113,10 @@
       spriteOffset = -Math.PI / 2; // 아래쪽 머리를 오른쪽 기준으로 맞추기
     }
 
-    // 개미마다 크기 랜덤 (모바일은 터치 영역 44px 이상)
-    const baseSize = 40;
-    const scale = randomBetween(0.7, 1.3);
-    const minSize = typeof ontouchstart !== 'undefined' ? 44 : 28;
+    // 개미마다 크기 랜덤 (차이 크게: 0.5~1.5배, 모바일은 최소 40px)
+    const baseSize = 42;
+    const scale = randomBetween(0.5, 1.5);
+    const minSize = typeof ontouchstart !== 'undefined' ? 40 : 24;
     const size = Math.max(minSize, Math.round(baseSize * scale));
     ant.style.width = size + 'px';
     ant.style.height = size + 'px';
@@ -152,24 +152,25 @@
     ant.appendChild(img);
 
     let x, y, angle, speed;
+    let wobblePhase = randomBetween(0, Math.PI * 2);
+    let driftAngle = randomBetween(0, Math.PI * 2);
     if (opts.fromEdge) {
       const theta = randomBetween(0, Math.PI * 2);
       const r = 55;
       x = 50 + r * Math.cos(theta);
       y = 50 + r * Math.sin(theta);
       angle = theta + Math.PI;
-      speed = randomBetween(0.2, 0.35);
+      speed = randomBetween(0.2, 0.36);
     } else {
       x = randomBetween(MIN_PERCENT, MAX_PERCENT);
       y = randomBetween(MIN_PERCENT, MAX_PERCENT);
       angle = randomBetween(0, Math.PI * 2);
-      speed = randomBetween(0.18, 0.32);
+      speed = randomBetween(0.16, 0.34);
     }
 
     function setPosition() {
       ant.style.left = x + '%';
       ant.style.top = y + '%';
-      // 상하(앞뒤)가 반대로 느껴져서 180도 추가 회전
       const deg = (angle + spriteOffset + Math.PI) * (180 / Math.PI);
       ant.style.transform = `translate(-50%, -50%) rotate(${deg}deg)`;
     }
@@ -177,14 +178,17 @@
     const move = () => {
       if (ant.classList.contains('squished')) return;
 
-      // 머리가 향한 방향(각도) 기준으로 앞으로 이동
-      // 가끔씩 각도를 조금씩 틀어 주어서 자연스럽게 기어가게 함
-      if (Math.random() < 0.15) {
-        angle += randomBetween(-0.3, 0.3);
+      wobblePhase += 0.12;
+      driftAngle += randomBetween(-0.02, 0.02);
+      if (Math.random() < 0.06) {
+        driftAngle += randomBetween(-0.25, 0.25);
       }
-
-      let vx = Math.cos(angle) * speed;
-      let vy = Math.sin(angle) * speed;
+      angle += (driftAngle - angle) * 0.08;
+      var wobble = Math.sin(wobblePhase) * 0.04;
+      var moveAngle = angle + wobble;
+      var speedNow = speed * (0.92 + 0.16 * Math.sin(wobblePhase * 0.7));
+      var vx = Math.cos(moveAngle) * speedNow;
+      var vy = Math.sin(moveAngle) * speedNow;
 
       x += vx;
       y += vy;
